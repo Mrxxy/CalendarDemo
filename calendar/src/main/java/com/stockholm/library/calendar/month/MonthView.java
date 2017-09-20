@@ -12,7 +12,6 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.View;
 
 import com.stockholm.library.R;
@@ -50,7 +49,7 @@ public class MonthView extends View {
     private boolean isShowLunar;
     private boolean isShowHolidayHint;
     private DisplayMetrics displayMetrics;
-    private OnMonthClickListener mDateClickListener;
+    private OnMonthClickListener dateClickListener;
     private GestureDetector mGestureDetector;
     private Bitmap restBitmap, restBitmapGray, workBitmap, workBitmapGray;
 
@@ -74,22 +73,6 @@ public class MonthView extends View {
         initAttrs(array, year, month);
         initPaint();
         initMonth();
-        initGestureDetector();
-    }
-
-    private void initGestureDetector() {
-        mGestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onDown(MotionEvent e) {
-                return true;
-            }
-
-            @Override
-            public boolean onSingleTapUp(MotionEvent e) {
-                doClickAction((int) e.getX(), (int) e.getY());
-                return true;
-            }
-        });
     }
 
     private void initAttrs(TypedArray array, int year, int month) {
@@ -423,66 +406,10 @@ public class MonthView extends View {
         return row == 0 && daysTextArray[row][column] >= 23 || row >= 4 && daysTextArray[row][column] <= 14;
     }
 
-    @Override
-    public boolean performClick() {
-        return super.performClick();
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        return mGestureDetector.onTouchEvent(event);
-    }
-
     public void setSelectYearMonth(int year, int month, int day) {
         selYear = year;
         selMonth = month;
         selDay = day;
-    }
-
-    private void doClickAction(int x, int y) {
-        if (y > getHeight())
-            return;
-        int row = y / rowSize;
-        if (row >= 3) {
-            row = (y - middleGap) / rowSize;
-        }
-        int column = x / columnSize;
-        column = Math.min(column, 6);
-        int clickYear = selYear, clickMonth = selMonth;
-        if (row == 0) {
-            if (daysTextArray[row][column] >= 23) {
-                if (selMonth == 0) {
-                    clickYear = selYear - 1;
-                    clickMonth = 11;
-                } else {
-                    clickYear = selYear;
-                    clickMonth = selMonth - 1;
-                }
-                if (mDateClickListener != null) {
-                    mDateClickListener.onClickLastMonth(clickYear, clickMonth, daysTextArray[row][column]);
-                }
-            } else {
-                clickThisMonth(clickYear, clickMonth, daysTextArray[row][column]);
-            }
-        } else {
-            int monthDays = CalendarUtils.getMonthDays(selYear, selMonth);
-            int weekNumber = CalendarUtils.getFirstDayWeek(selYear, selMonth);
-            int nextMonthDays = 42 - monthDays - weekNumber + 1;
-            if (daysTextArray[row][column] <= nextMonthDays && row >= 4) {
-                if (selMonth == 11) {
-                    clickYear = selYear + 1;
-                    clickMonth = 0;
-                } else {
-                    clickYear = selYear;
-                    clickMonth = selMonth + 1;
-                }
-                if (mDateClickListener != null) {
-                    mDateClickListener.onClickNextMonth(clickYear, clickMonth, daysTextArray[row][column]);
-                }
-            } else {
-                clickThisMonth(clickYear, clickMonth, daysTextArray[row][column]);
-            }
-        }
     }
 
     /**
@@ -493,8 +420,8 @@ public class MonthView extends View {
      * @param day
      */
     public void clickThisMonth(int year, int month, int day) {
-        if (mDateClickListener != null) {
-            mDateClickListener.onClickThisMonth(year, month, day);
+        if (dateClickListener != null) {
+            dateClickListener.onClickThisMonth(year, month, day);
         }
         setSelectYearMonth(year, month, day);
         invalidate();
@@ -541,7 +468,7 @@ public class MonthView extends View {
      * @param dateClickListener
      */
     public void setOnDateClickListener(OnMonthClickListener dateClickListener) {
-        this.mDateClickListener = dateClickListener;
+        this.dateClickListener = dateClickListener;
     }
 
 }
