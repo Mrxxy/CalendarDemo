@@ -1,6 +1,9 @@
 package com.stockholm.library.calendar.month;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
@@ -10,6 +13,7 @@ import com.stockholm.library.calendar.OnCalendarClickListener;
 
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -17,8 +21,10 @@ import java.util.TimeZone;
 
 public class MonthCalendarView extends LinearLayout implements OnMonthClickListener {
 
+    private Context context;
     private OnCalendarClickListener mOnCalendarClickListener;
     private MonthView monthDateView;
+    private TimeReceiver timeReceiver;
 
     public MonthCalendarView(Context context) {
         this(context, null);
@@ -26,6 +32,7 @@ public class MonthCalendarView extends LinearLayout implements OnMonthClickListe
 
     public MonthCalendarView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.context = context;
         initAttrs(context, attrs);
     }
 
@@ -40,6 +47,23 @@ public class MonthCalendarView extends LinearLayout implements OnMonthClickListe
         monthDateView.invalidate();
         monthDateView.setOnDateClickListener(this);
         addView(monthDateView);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        timeReceiver = new TimeReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_TIME_TICK);
+        filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+        filter.addAction(Intent.ACTION_DATE_CHANGED);
+        context.registerReceiver(timeReceiver, filter);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        context.unregisterReceiver(timeReceiver);
     }
 
     @Override
@@ -82,6 +106,18 @@ public class MonthCalendarView extends LinearLayout implements OnMonthClickListe
      */
     public void setOnCalendarClickListener(OnCalendarClickListener onCalendarClickListener) {
         mOnCalendarClickListener = onCalendarClickListener;
+    }
+
+    private class TimeReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            LocalTime now = LocalTime.now();
+            if ((now.getHourOfDay() == 0 && now.getMinuteOfHour() == 0)
+                    || action.equals(Intent.ACTION_TIME_CHANGED) || action.equals(Intent.ACTION_DATE_CHANGED)) {
+                monthDateView.postInvalidate();
+            }
+        }
     }
 
 }
