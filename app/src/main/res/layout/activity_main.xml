@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="768dp"
+    android:layout_height="768dp"
+    android:background="@drawable/calendar"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="470dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="150dp"
+        android:orientation="vertical">
+
+        <com.stockholm.library.calendar.WeekBarView
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            app:week_text_size="22" />
+
+        <com.stockholm.library.calendar.month.MonthCalendarView
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            app:month_count="3"
+            app:month_day_lunar_text_size="11"
+            app:month_day_text_size="28"
+            app:month_holiday_color="#f43c3c"
+            app:month_lunar_text_color="#4d4d4d"
+            app:month_normal_text_color="#4d4d4d"
+            app:month_selected_circle_today_color="#f43c3c"
+            app:month_show_lunar="true" />
+
+    </LinearLayout>
+
+</RelativeLayout>
